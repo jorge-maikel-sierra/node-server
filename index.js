@@ -1,42 +1,50 @@
-const http = require("http");
-const fs = require("fs");
-const url = require("url");
+const express = require("express");
 const path = require("path");
+const authorRouter = require("./routes/authorRouter");
+const bookRouter = require("./routes/bookRouter");
 
+const app = express();
 const port = 8080;
 
-const server = http.createServer((req, res) => {
-  const parsedUrl = url.parse(req.url, true);
-  let pathname = parsedUrl.pathname;
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "ejs");
 
-  let filePath = "";
+const assetsPath = path.join(__dirname, "public");
+app.use(express.static(assetsPath));
 
-  if (pathname === "/") {
-    filePath = path.join(__dirname, "index.html");
-  } else if (pathname === "/about") {
-    filePath = path.join(__dirname, "about.html");
-  } else if (pathname === "/contact-me") {
-    filePath = path.join(__dirname, "contact-me.html");
-  } else {
-    filePath = path.join(__dirname, "404.html");
-    res.statusCode = 404;
-  }
+const links = [
+  { href: "/", text: "Home" },
+  { href: "/about", text: "About" },
+  { href: "/contact-me", text: "Contact Me" },
+];
 
-  fs.readFile(filePath, (err, data) => {
-    if (err) {
-      res.writeHead(500, { "Content-Type": "text/plain" });
-      res.end("Internal Server Error");
-      return;
-    }
+const users = ["Rose", "Cake", "Biff"];
 
-    res.writeHead(res.statusCode || 200, {
-      "Content-Type": "text/html",
-    });
-
-    res.end(data);
-  });
+app.get("/", (req, res) => {
+  res.render("index", { links: links, users: users });
 });
 
-server.listen(port, () => {
+app.get("/about", (req, res) => {
+  res.render("about", { links: links });
+});
+
+app.get("/contact-me", (req, res) => {
+  res.render("contact-me", { links: links });
+});
+
+app.use("/authors", authorRouter);
+app.use("/books", bookRouter);
+
+app.use((req, res) => {
+  res.status(404).render("404", { links: links });
+});
+
+// Middleware de manejo de errores (debe tener 4 parámetros)
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(err.statusCode || 500).send(err.message);
+});
+
+app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
 });

@@ -1,0 +1,14 @@
+<!-- about.ejs -->
+<html>
+  <head>
+    <title>About</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <%- include('navbar', {links: links}) %>
+    <h1>About</h1>
+    <p>Este es un servidor HTTP construido con Express.js y EJS como motor de plantillas.</p>
+    <p>El proyecto sirve páginas HTML dinámicas y expone una API REST de autores y libros.</p>
+    <%- include('footer') %>
+  </body>
+</html>
